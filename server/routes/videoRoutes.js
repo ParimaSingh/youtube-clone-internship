@@ -1,11 +1,10 @@
 const express = require("express");
 
+const { getVideos, createVideo } = require("../controllers/videoController");
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({
-    message: "Video API is working!",
-  });
-});
+router.get("/", getVideos);
+router.post("/", createVideo);
 
 module.exports = router;
