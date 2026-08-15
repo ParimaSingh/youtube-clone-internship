@@ -1,6 +1,37 @@
+
+import { useEffect } from "react";
+import { io } from "socket.io-client";
+import "./App.css";
 import './App.css'
 
 function App() {
+    useEffect(() => {
+  const socket = io("http://localhost:5000");
+
+  socket.on("connect", () => {
+    console.log("Connected to server:", socket.id);
+
+    socket.emit("join-room", "ROOM123");
+    console.log("Joining room: ROOM123");
+  });
+
+  socket.on("user-joined", (data) => {
+    console.log("New user joined:", data.socketId);
+  });
+
+  socket.on("user-left", (data) => {
+    console.log("User left:", data.socketId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Disconnected from server");
+  });
+
+  return () => {
+    socket.emit("leave-room", "ROOM123");
+    socket.disconnect();
+  };
+}, []);
   return (
     <div className="app">
 
