@@ -6,8 +6,11 @@ const connectDB = require("./db");
 
 const videoRoutes = require("./routes/videoRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const downloadRoutes = require("./routes/downloadRoutes");
 const app = express();
+app.use(express.json());
 const PORT = 5000;
+connectDB();
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -62,6 +65,7 @@ socket.on("ice-candidate", ({ roomId, candidate }) => {
 
 app.use("/api/videos", videoRoutes);
 app.use("/api/rooms", roomRoutes);
+app.use("/api/downloads", downloadRoutes);
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
