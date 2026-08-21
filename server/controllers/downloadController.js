@@ -39,8 +39,7 @@ const getRemainingDailyQuota = async (userId, plan) => {
 
 const checkDownloadAuthorization = async (req, res) => {
   try {
-    const { userId, videoId } = req.body;
-
+    const { userId, videoId, deviceId, subscriptionPlan, fileSize } = req.body;
     if (!userId || !videoId) {
       return res.status(400).json({
         message: "userId and videoId are required",
