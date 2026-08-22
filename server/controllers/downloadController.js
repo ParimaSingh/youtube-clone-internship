@@ -474,10 +474,87 @@ const interruptDownload = async (req, res) => {
     });
   }
 };
+
+const getUserDownloads = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const downloads = await Download.find({ userId })
+      .populate("videoId", "title thumbnailUrl videoUrl")
+      .sort({ downloadDate: -1 });
+
+    const subscription = await Subscription.findOne({
+      userId,
+      isActive: true,
+    }).sort({ expiryDate: -1 });
+
+    let remainingQuota = 0;
+
+    if (subscription && subscription.expiryDate > new Date()) {
+      remainingQuota = await getRemainingDailyQuota(
+        userId,
+        subscription.plan
+      );
+    }
+
+    const downloadHistory = downloads.map((download) => ({
+      downloadId: download._id,
+      video: download.videoId
+        ? {
+            id: download.videoId._id,
+            title: download.videoId.title,
+            thumbnailUrl: download.videoId.thumbnailUrl,
+            videoUrl: download.videoId.videoUrl,
+          }
+        : null,
+      downloadDate: download.downloadDate,
+      status: download.status,
+      fileSize: download.fileSize,
+      subscriptionPlan: download.subscriptionPlan,
+      remainingQuota:
+        download.status === "pending" || download.status === "completed"
+          ? Math.max(download.quotaAtDownload - 1, 0)
+          : download.quotaAtDownload,
+      downloadCompletedAt: download.downloadCompletedAt,
+      deviceId: download.deviceId,
+      deviceInfo: download.deviceInfo,
+      browser: download.browser,
+    }));
+
+    return res.status(200).json({
+      userId,
+      totalDownloads: downloads.length,
+      remainingQuota,
+      downloads: downloadHistory,
+    });
+  } catch (error) {
+    console.error("Get user downloads error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch download history",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
-  checkDownloadAuthorization,
+ checkDownloadAuthorization,
   createDownload,
-completeDownload,
-failDownload,
-interruptDownload,
+  completeDownload,
+  failDownload,
+  interruptDownload,
+  getUserDownloads,
 };

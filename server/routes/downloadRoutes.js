@@ -1,15 +1,17 @@
-const express = require("express");
 
 const {
   checkDownloadAuthorization,
   createDownload,
   completeDownload,
-failDownload,
-interruptDownload,
+  failDownload,
+  interruptDownload,
+  getUserDownloads,
 } = require("../controllers/downloadController");
+const express = require("express");
+
 
 const router = express.Router();
-
+router.get("/user/:userId", getUserDownloads);
 router.post("/authorize", checkDownloadAuthorization);
 
 router.post("/", createDownload);
