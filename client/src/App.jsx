@@ -1,5 +1,6 @@
 import VideoCall from "./VideoCall";
 import DownloadTest from "./DownloadTest";
+import SubscriptionDashboard from "./SubscriptionDashboard";
 import "./App.css";
 
 function App() {
@@ -12,6 +13,10 @@ function App() {
       <hr />
 
       <DownloadTest />
+
+      <hr />
+
+      <SubscriptionDashboard />
     </div>
   );
 }
