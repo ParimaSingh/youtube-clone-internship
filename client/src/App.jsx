@@ -1,4 +1,5 @@
 import VideoCall from "./VideoCall";
+import DownloadTest from "./DownloadTest";
 import "./App.css";
 
 function App() {
@@ -7,6 +8,10 @@ function App() {
       <h1>StreamTube</h1>
 
       <VideoCall />
+
+      <hr />
+
+      <DownloadTest />
     </div>
   );
 }

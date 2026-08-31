@@ -40,41 +40,73 @@ const createTestData = async () => {
     });
 
     // Create users
-    const freeUser = await User.create({
-      name: "Task 2 Free User",
-      email: "task2-free@test.com",
-      subscriptionPlan: "Free",
-      isActive: true,
-    });
+   const freeUser = await User.create({
+  name: "Task 2 Free User",
+  email: "task2-free@test.com",
+  subscriptionPlan: "Free",
+  registeredDevices: [
+    {
+      deviceId: "task2-free-device",
+      deviceName: "Test Laptop",
+      lastUsedAt: new Date(),
+    },
+  ],
+  isActive: true,
+});
 
-    const bronzeUser = await User.create({
-      name: "Task 2 Bronze User",
-      email: "task2-bronze@test.com",
-      subscriptionPlan: "Bronze",
-      isActive: true,
-    });
-
-    const silverUser = await User.create({
-      name: "Task 2 Silver User",
-      email: "task2-silver@test.com",
-      subscriptionPlan: "Silver",
-      isActive: true,
-    });
-
-    const goldUser = await User.create({
-      name: "Task 2 Gold User",
-      email: "task2-gold@test.com",
-      subscriptionPlan: "Gold",
-      isActive: true,
-    });
-
-    const expiredUser = await User.create({
-      name: "Task 2 Expired User",
-      email: "task2-expired@test.com",
-      subscriptionPlan: "Gold",
-      isActive: true,
-    });
-
+   const bronzeUser = await User.create({
+  name: "Task 2 Bronze User",
+  email: "task2-bronze@test.com",
+  subscriptionPlan: "Bronze",
+  registeredDevices: [
+    {
+      deviceId: "task2-bronze-device",
+      deviceName: "Test Laptop",
+      lastUsedAt: new Date(),
+    },
+  ],
+  isActive: true,
+});
+    
+const silverUser = await User.create({
+  name: "Task 2 Silver User",
+  email: "task2-silver@test.com",
+  subscriptionPlan: "Silver",
+  registeredDevices: [
+    {
+      deviceId: "task2-silver-device",
+      deviceName: "Test Laptop",
+      lastUsedAt: new Date(),
+    },
+  ],
+  isActive: true,
+});
+   const goldUser = await User.create({
+  name: "Task 2 Gold User",
+  email: "task2-gold@test.com",
+  subscriptionPlan: "Gold",
+  registeredDevices: [
+    {
+      deviceId: "task2-gold-device",
+      deviceName: "Test Laptop",
+      lastUsedAt: new Date(),
+    },
+  ],
+  isActive: true,
+});
+   const expiredUser = await User.create({
+  name: "Task 2 Expired User",
+  email: "task2-expired@test.com",
+  subscriptionPlan: "Gold",
+  registeredDevices: [
+    {
+      deviceId: "task2-expired-device",
+      deviceName: "Test Laptop",
+      lastUsedAt: new Date(),
+    },
+  ],
+  isActive: true,
+});
     // Dates
     const now = new Date();
 
@@ -104,8 +136,8 @@ const createTestData = async () => {
     await Subscription.create({
       userId: bronzeUser._id,
       plan: "Bronze",
-      dailyDownloadLimit: 3,
-      monthlyDownloadLimit: 30,
+      dailyDownloadLimit: 5,
+      monthlyDownloadLimit: 150,
       startDate: activeStartDate,
       expiryDate: activeExpiryDate,
       isActive: true,
@@ -114,8 +146,8 @@ const createTestData = async () => {
     await Subscription.create({
       userId: silverUser._id,
       plan: "Silver",
-      dailyDownloadLimit: 5,
-      monthlyDownloadLimit: 100,
+      dailyDownloadLimit: 10,
+      monthlyDownloadLimit: 300,
       startDate: activeStartDate,
       expiryDate: activeExpiryDate,
       isActive: true,
@@ -124,8 +156,8 @@ const createTestData = async () => {
     await Subscription.create({
       userId: goldUser._id,
       plan: "Gold",
-      dailyDownloadLimit: 10,
-      monthlyDownloadLimit: 300,
+      dailyDownloadLimit: 20,
+      monthlyDownloadLimit: 600,
       startDate: activeStartDate,
       expiryDate: activeExpiryDate,
       isActive: true,
@@ -134,8 +166,8 @@ const createTestData = async () => {
     await Subscription.create({
       userId: expiredUser._id,
       plan: "Gold",
-      dailyDownloadLimit: 10,
-      monthlyDownloadLimit: 300,
+      dailyDownloadLimit: 20,
+      monthlyDownloadLimit: 600,
       startDate: expiredStartDate,
       expiryDate: expiredExpiryDate,
       isActive: false,
@@ -174,9 +206,9 @@ const createTestData = async () => {
 
     console.log("\n================================");
     console.log("FREE LIMIT   : 1/day");
-    console.log("BRONZE LIMIT : 3/day");
-    console.log("SILVER LIMIT : 5/day");
-    console.log("GOLD LIMIT   : 10/day");
+    console.log("BRONZE LIMIT : 5/day");
+    console.log("SILVER LIMIT : 10/day");
+    console.log("GOLD LIMIT   : 20/day");
     console.log("================================");
 
   } catch (error) {
