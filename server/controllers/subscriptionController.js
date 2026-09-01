@@ -147,8 +147,88 @@ const getSubscriptionPlans = (req, res) => {
     });
   }
 };
+// Get subscription history for a user
+const getSubscriptionHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const history = await Subscription.find({
+      userId,
+    }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      message: "Subscription history retrieved successfully",
+      history,
+    });
+  } catch (error) {
+    console.error("Get subscription history error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+// Get details of the user's current subscription plan
+const getSubscriptionPlanDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const subscription = await Subscription.findOne({
+      userId,
+      isActive: true,
+      expiryDate: {
+        $gt: new Date(),
+      },
+    }).sort({
+      createdAt: -1,
+    });
+
+    if (!subscription) {
+      return res.status(404).json({
+        message: "No active subscription found",
+      });
+    }
+
+    const planDetails = SUBSCRIPTION_PLANS[subscription.plan];
+
+    return res.status(200).json({
+      message: "Subscription plan details retrieved successfully",
+      plan: subscription.plan,
+      details: planDetails,
+      subscription: {
+        startDate: subscription.startDate,
+        expiryDate: subscription.expiryDate,
+        isActive: subscription.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("Get subscription plan details error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   createSubscription,
   getActiveSubscription,
   getSubscriptionPlans,
+ getSubscriptionHistory,
+  getSubscriptionPlanDetails,
 };
