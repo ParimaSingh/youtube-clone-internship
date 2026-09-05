@@ -1,4 +1,4 @@
-
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
@@ -9,6 +9,7 @@ const videoRoutes = require("./routes/videoRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const downloadRoutes = require("./routes/downloadRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -70,6 +71,7 @@ app.use("/api/videos", videoRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/downloads", downloadRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/payments", paymentRoutes);
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
