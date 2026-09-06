@@ -1,4 +1,5 @@
 const Razorpay = require("razorpay");
+const crypto = require("crypto");
 const SUBSCRIPTION_PLANS = require("../config/subscriptionPlans");
 
 const razorpayConfigured =
@@ -86,6 +87,52 @@ const createPaymentOrder = async (req, res) => {
   }
 };
 
+const verifyPayment = (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+    } = req.body;
+
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature
+    ) {
+      return res.status(400).json({
+        message: "Payment verification details are required",
+      });
+    }
+
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        message: "Payment signature verification failed",
+        verified: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Payment signature verified successfully",
+      verified: true,
+      razorpay_order_id,
+      razorpay_payment_id,
+    });
+  } catch (error) {
+    console.error("Payment verification error:", error);
+
+    return res.status(500).json({
+      message: "Payment verification failed",
+    });
+  }
+};
+
 module.exports = {
   createPaymentOrder,
+  verifyPayment,
 };
