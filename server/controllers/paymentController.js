@@ -1,6 +1,7 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const SUBSCRIPTION_PLANS = require("../config/subscriptionPlans");
+const Payment = require("../models/Payment");
 
 const razorpayConfigured =
   process.env.RAZORPAY_KEY_ID &&
@@ -87,14 +88,38 @@ const createPaymentOrder = async (req, res) => {
   }
 };
 
-const verifyPayment = (req, res) => {
+const verifyPayment = async (req, res) => {
   try {
+    const { status } = req.body;
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
     } = req.body;
+if (status === "failed" || status === "cancelled") {
+  return res.status(400).json({
+    message: "Payment was not successful",
+    verified: false,
+  });
+}
+const planDetails = SUBSCRIPTION_PLANS[req.body.plan];
 
+if (!planDetails) {
+  return res.status(400).json({
+    message: "Invalid subscription plan",
+    verified: false,
+  });
+}
+const existingPayment = await Payment.findOne({
+  razorpay_payment_id,
+});
+
+if (existingPayment) {
+  return res.status(400).json({
+    message: "Payment already processed",
+    verified: false,
+  });
+}
     if (
       !razorpay_order_id ||
       !razorpay_payment_id ||
@@ -116,7 +141,14 @@ const verifyPayment = (req, res) => {
         verified: false,
       });
     }
-
+await Payment.create({
+  plan: req.body.plan,
+  razorpay_order_id,
+  razorpay_payment_id,
+  amount: SUBSCRIPTION_PLANS[req.body.plan].price * 100,
+  currency: "INR",
+  status: "paid",
+});
     return res.status(200).json({
       message: "Payment signature verified successfully",
       verified: true,
