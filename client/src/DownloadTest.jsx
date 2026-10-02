@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://youtube-clone-internship-e5dm.onrender.com";
 
 const TEST_USERS = {
   Free: {
@@ -13,7 +13,7 @@ const TEST_USERS = {
   },
   Silver: {
     userId: "6a958aeb6d13636d631e98c7",
-    deviceId: "task2-silver-device",
+    Id: "task2-silver-device",
   },
   Gold: {
     userId: "6a958aeb6d13636d631e98c9",
@@ -30,7 +30,7 @@ function DownloadTest() {
   const [downloads, setDownloads] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const user = TEST_USERS[plan];
+ const user = TEST_USERS[plan];
 
   const authorizeDownload = async () => {
     try {
@@ -257,4 +257,4 @@ function DownloadTest() {
   );
 }
 
-export default DownloadTest;
+export default DownloadTest; 

@@ -115,7 +115,7 @@ setConnectionStatus("waiting");
       console.log("Camera stream ready");
 
       // 2. Connect Socket.IO
-      const socket = io("http://localhost:5000");
+      const socket = io("https://youtube-clone-internship-e5dm.onrender.com");
 
       socketRef.current = socket;
 

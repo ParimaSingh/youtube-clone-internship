@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://youtube-clone-internship-e5dm.onrender.com";
 const TEST_USERS = {
   Free: {
     userId: "6a958aeb6d13636d631e98c3",

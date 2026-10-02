@@ -5,7 +5,7 @@ function SocketTest() {
   const [status, setStatus] = useState("Connecting...");
 
   useEffect(() => {
-    const socket = io("http://localhost:5000");
+    const socket = io("https://youtube-clone-internship-e5dm.onrender.com");
 
     socket.on("connect", () => {
       setStatus("Connected! Socket ID: " + socket.id);

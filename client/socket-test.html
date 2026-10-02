@@ -10,10 +10,10 @@
 
   <p id="status">Not connected</p>
 
-  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="https://youtube-clone-internship-e5dm.onrender.com/socket.io/socket.io.js"></script>
 
   <script>
-    const socket = io("http://localhost:5000");
+    const socket = io("https://youtube-clone-internship-e5dm.onrender.com");
 
     socket.on("connect", () => {
       document.getElementById("status").textContent =
