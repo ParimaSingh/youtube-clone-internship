@@ -225,10 +225,256 @@ const getSubscriptionPlanDetails = async (req, res) => {
     });
   }
 };
+// Upgrade or downgrade subscription
+// Upgrade or downgrade subscription
+const changeSubscriptionPlan = async (req, res) => {
+  try {
+    const { userId, newPlan } = req.body;
+
+    if (!userId || !newPlan) {
+      return res.status(400).json({
+        message: "userId and newPlan are required",
+      });
+    }
+
+    if (!SUBSCRIPTION_PLANS[newPlan]) {
+      return res.status(400).json({
+        message: "Invalid subscription plan",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const currentPlan = user.subscriptionPlan || "Free";
+
+    if (currentPlan === newPlan) {
+      return res.status(400).json({
+        message: "You are already subscribed to this plan",
+      });
+    }
+
+    const planOrder = {
+      Free: 0,
+      Bronze: 1,
+      Silver: 2,
+      Gold: 3,
+    };
+
+    const changeType =
+      planOrder[newPlan] > planOrder[currentPlan]
+        ? "upgrade"
+        : "downgrade";
+
+    const planDetails = SUBSCRIPTION_PLANS[newPlan];
+
+    const startDate = new Date();
+
+    const expiryDate = new Date(startDate);
+    expiryDate.setDate(
+      expiryDate.getDate() + planDetails.durationDays
+    );
+
+    // Deactivate previous active subscription
+    await Subscription.updateMany(
+      {
+        userId,
+        isActive: true,
+      },
+      {
+        $set: {
+          isActive: false,
+        },
+      }
+    );
+
+    // Create new subscription
+    const subscription = await Subscription.create({
+      userId,
+      plan: newPlan,
+      dailyDownloadLimit: planDetails.dailyDownloadLimit,
+      monthlyDownloadLimit: planDetails.monthlyDownloadLimit,
+      startDate,
+      expiryDate,
+      isActive: true,
+    });
+
+    // Update user's subscription information
+    user.subscriptionPlan = newPlan;
+    user.subscriptionStartDate = startDate;
+    user.subscriptionExpiryDate = expiryDate;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: `Subscription ${changeType} successful`,
+      changeType,
+      previousPlan: currentPlan,
+      newPlan,
+      subscription: {
+        id: subscription._id,
+        plan: subscription.plan,
+        startDate: subscription.startDate,
+        expiryDate: subscription.expiryDate,
+        isActive: subscription.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("Change subscription plan error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+// Renew subscription
+const renewSubscription = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const currentPlan = user.subscriptionPlan || "Free";
+    const planDetails = SUBSCRIPTION_PLANS[currentPlan];
+
+    if (!planDetails) {
+      return res.status(400).json({
+        message: "Invalid current subscription plan",
+      });
+    }
+
+    const startDate = new Date();
+
+    const expiryDate = new Date(startDate);
+    expiryDate.setDate(
+      expiryDate.getDate() + planDetails.durationDays
+    );
+
+    await Subscription.updateMany(
+      {
+        userId,
+        isActive: true,
+      },
+      {
+        $set: {
+          isActive: false,
+        },
+      }
+    );
+
+    const subscription = await Subscription.create({
+      userId,
+      plan: currentPlan,
+      dailyDownloadLimit: planDetails.dailyDownloadLimit,
+      monthlyDownloadLimit: planDetails.monthlyDownloadLimit,
+      startDate,
+      expiryDate,
+      isActive: true,
+    });
+
+    user.subscriptionStartDate = startDate;
+    user.subscriptionExpiryDate = expiryDate;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Subscription renewed successfully",
+      plan: currentPlan,
+      startDate,
+      expiryDate,
+      isActive: true,
+      subscriptionId: subscription._id,
+    });
+  } catch (error) {
+    console.error("Renew subscription error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+// Cancel subscription
+const cancelSubscription = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "userId is required",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const subscription = await Subscription.findOne({
+      userId,
+      isActive: true,
+    }).sort({
+      createdAt: -1,
+    });
+
+    if (!subscription) {
+      return res.status(404).json({
+        message: "No active subscription found",
+      });
+    }
+
+    subscription.isActive = false;
+    await subscription.save();
+
+    user.subscriptionPlan = "Free";
+    user.subscriptionStartDate = null;
+    user.subscriptionExpiryDate = null;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Subscription cancelled successfully",
+      previousPlan: subscription.plan,
+      currentPlan: "Free",
+      isActive: false,
+    });
+  } catch (error) {
+    console.error("Cancel subscription error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   createSubscription,
   getActiveSubscription,
   getSubscriptionPlans,
  getSubscriptionHistory,
   getSubscriptionPlanDetails,
+    changeSubscriptionPlan,
+      renewSubscription,
+  cancelSubscription,
 };

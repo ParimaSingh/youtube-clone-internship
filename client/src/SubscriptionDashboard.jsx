@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:5000";
-
+const TEST_USERS = {
+  Free: {
+    userId: "6a958aeb6d13636d631e98c3",
+  },
+  Bronze: {
+    userId: "6a958aeb6d13636d631e98c5",
+  },
+  Silver: {
+    userId: "6a958aeb6d13636d631e98c7",
+  },
+  Gold: {
+    userId: "6a958aeb6d13636d631e98c9",
+  },
+};
 function SubscriptionDashboard() {
   const [plans, setPlans] = useState({});
   const [loading, setLoading] = useState(true);
@@ -37,6 +50,35 @@ function SubscriptionDashboard() {
     setPaymentStatus("");
     setShowPayment(true);
   };
+  const handleCancelSubscription = async () => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/subscriptions/cancel`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: TEST_USERS[selectedPlan].userId,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+  alert(data.message);
+  setSelectedPlan("Free");
+}
+else {
+      alert(data.message || "Failed to cancel subscription");
+    }
+  } catch (error) {
+    console.error("Cancel subscription error:", error);
+    alert("Server error while cancelling subscription");
+  }
+};
 
   const handleMockPayment = (status) => {
     if (status === "success") {
@@ -172,6 +214,12 @@ function SubscriptionDashboard() {
         <button onClick={handleContinueToPayment}>
           Continue to Payment
         </button>
+        <button
+  onClick={handleCancelSubscription}
+  style={{ marginLeft: "10px" }}
+>
+  Cancel Subscription
+</button>
       </div>
 
       {showPayment && (
