@@ -13,7 +13,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 connectDB();
 const server = http.createServer(app);
 
@@ -72,6 +72,4 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/downloads", downloadRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/payments", paymentRoutes);
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
