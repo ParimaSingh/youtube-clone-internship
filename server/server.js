@@ -72,4 +72,6 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/downloads", downloadRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/payments", paymentRoutes);
-const PORT = process.env.PORT || 5000;
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
